@@ -1,0 +1,46 @@
+/**
+ * Validation module - Basitleştirilmiş versiyon
+ */
+
+// Constants
+export {
+  DIMENSION_CONSTRAINTS,
+  PLATE_CONSTRAINTS,
+  INITIAL_PLATE_DIMENSION,
+} from './constants';
+
+// Types
+export type {
+  DimensionValue,
+  ValidationResult,
+  DimensionValidationResult,
+  ClampedValue,
+  DimensionField,
+  DimensionConstraint,
+} from './types';
+
+// Validators
+export {
+  isValidNumber,
+  validateDimensionValue,
+  validateDimensions,
+  validateAllDimensions,
+  clampDimensionValue,
+  clampDimensions,
+  validatePlateCount,
+  canDeletePlate,
+  formatDimensionValue,
+  cmToMm,
+  mmToCm,
+  getDimensionConstraint,
+  createDefaultDimension,
+  sanitizeNumericInput,
+} from './validators';
+
+// Hooks (tüm hooks artık tek dosyada)
+export {
+  useDimensionValidation,
+  useMultipleDimensionsValidation,
+  useDimensionInput,
+  usePersistedDimensions,
+} from '../../hooks/hooks';
