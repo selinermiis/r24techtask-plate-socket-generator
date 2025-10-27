@@ -8,10 +8,10 @@ import {
   createDefaultDimension,
   cmToMm,
   clampDimensionValue,
-  usePersistedDimensions,
   type DimensionValue,
   type DimensionField,
 } from '@/app/features/validation';
+import { usePlateContext } from '@/app/context/PlateContext';
 
 // Types
 interface Step1Props {
@@ -45,20 +45,20 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
   if (!isActive) {
     // Simplified view for inactive cards - just the input (read-only)
     return (
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div className="relative">
           <input
             type="number"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled
-            className="h-8 w-full px-3 pr-12 py-2 text-base font-semibold text-center border border-gray-100 rounded-lg bg-white text-black cursor-not-allowed"
+            className="h-8 sm:h-9 w-full px-2 sm:px-3 pr-8 sm:pr-12 py-2 text-sm sm:text-base font-semibold text-center border border-gray-100 rounded-lg bg-white text-black cursor-not-allowed"
             step="0.1"
             min={min}
             max={max}
             aria-label={label}
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-600 font-medium pointer-events-none">
+          <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-xs sm:text-sm text-gray-600 font-medium pointer-events-none">
             {unit}
           </span>
         </div>
@@ -68,10 +68,12 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
 
   // Full view for active cards
   return (
-    <div className="flex flex-col gap-2 flex-1">
+    <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-black">{label}</label>
-        <span className="text-xs text-gray-500">
+        <label className="text-xs sm:text-sm font-medium text-black truncate">
+          {label}
+        </label>
+        <span className="text-[10px] sm:text-xs text-gray-500 whitespace-nowrap ml-1">
           {min} - {max} {unit}
         </span>
       </div>
@@ -81,17 +83,19 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          className="h-10 w-full px-3 pr-12 py-2 text-xl font-semibold text-center border border-gray-300 rounded-lg focus:outline-none  bg-white text-black focus:border-transparent transition-shadow"
+          className="h-9 sm:h-10 w-full px-2 sm:px-3 pr-8 sm:pr-12 py-2 text-lg sm:text-xl font-semibold text-center border border-gray-300 rounded-lg focus:outline-none bg-white text-black focus:border-transparent transition-shadow"
           step="0.1"
           min={min}
           max={max}
           aria-label={label}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-600 font-medium pointer-events-none">
+        <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-xs sm:text-sm text-gray-600 font-medium pointer-events-none">
           {unit}
         </span>
       </div>
-      <div className="text-xs text-gray-500 text-center">{mmValue} mm</div>
+      <div className="text-[10px] sm:text-xs text-gray-500 text-center">
+        {mmValue} mm
+      </div>
     </div>
   );
 };
@@ -102,7 +106,7 @@ const RemoveButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
       e.stopPropagation();
       onClick();
     }}
-    className="w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center hover:bg-red-100 active:bg-red-200 transition-colors text-xl leading-none"
+    className="w-5 h-5 sm:w-6 sm:h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center hover:bg-red-100 active:bg-red-200 transition-colors text-lg sm:text-xl leading-none"
     aria-label="Rückwand entfernen"
   >
     -
@@ -134,14 +138,14 @@ const DimensionCard: React.FC<{
     onClick={() => onSelect(index)}
     className={`rounded-lg border shadow-sm transition-all cursor-pointer ${
       isActive
-        ? 'bg-gray-100 border-gray-100 p-2'
-        : 'bg-gray-100 border-gray-100 opacity-80 hover:opacity-100 p-2'
+        ? 'bg-gray-100 border-gray-100 p-2 sm:p-3'
+        : 'bg-gray-100 border-gray-100 opacity-80 hover:opacity-100 p-2 sm:p-3'
     }`}
   >
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       {/* Number Badge */}
       <div
-        className={`w-8 h-8 rounded-lg flex items-center justify-center font-semibold shrink-0 ${
+        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-sm sm:text-base font-semibold shrink-0 ${
           isActive
             ? ' bg-black text-white'
             : ' bg-white border border-black text-black'
@@ -152,7 +156,7 @@ const DimensionCard: React.FC<{
 
       {/* Dimension Inputs */}
       <div
-        className="flex-1 flex items-center gap-3"
+        className="flex-1 flex items-center gap-1.5 sm:gap-3 min-w-0"
         onClick={(e) => e.stopPropagation()}
       >
         <DimensionInput
@@ -167,7 +171,7 @@ const DimensionCard: React.FC<{
 
         {/* Multiply Icon */}
         <div
-          className={`text-gray-400 text-xl font-light ${isActive ? 'self-center' : ''}`}
+          className={`text-gray-400 text-lg sm:text-xl font-light shrink-0 ${isActive ? 'self-center' : ''}`}
         >
           ×
         </div>
@@ -195,9 +199,9 @@ const DimensionCard: React.FC<{
 
 // Main Component
 export default function Step1({ onComplete }: Step1Props) {
-  // Use persisted dimensions hook (automatically saves to localStorage)
+  // Use plate context (automatically saves to localStorage)
   const { dimensions, setDimensions, activeIndex, setActiveIndex } =
-    usePersistedDimensions();
+    usePlateContext();
 
   // Validation using the validation module
   const isValid = validateAllDimensions(dimensions);
@@ -269,7 +273,7 @@ export default function Step1({ onComplete }: Step1Props) {
   }, [isValid, onComplete]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Dimension Cards */}
       {dimensions.map((dim, index) => (
         <DimensionCard
@@ -289,10 +293,11 @@ export default function Step1({ onComplete }: Step1Props) {
       {/* Add Back Panel Button */}
       <button
         onClick={addDimension}
-        className="px-4 py-2 border border-green-400 text-green-600 rounded-lg hover:bg-green-50 active:bg-green-100 transition-colors font-semibold flex items-center  justify-center justify-self-end gap-2"
+        className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-green-400 text-green-600 rounded-lg hover:bg-green-50 active:bg-green-100 transition-colors text-sm sm:text-base font-semibold flex items-center justify-center sm:justify-self-end gap-1.5 sm:gap-2"
         aria-label="Rückwand hinzufügen"
       >
-        Rückwand hinzufügen <span className="font-semibold">+</span>
+        <span>Rückwand hinzufügen</span>{' '}
+        <span className="font-semibold text-base sm:text-lg">+</span>
       </button>
     </div>
   );

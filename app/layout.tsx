@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { PlateProvider } from './context/PlateContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -16,6 +17,12 @@ export const metadata: Metadata = {
   title: 'R24 Technical Task - Plate & Socket Generator',
   description:
     'A professional tool for generating electrical plates and sockets for circuits',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +36,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        {children}
+        <PlateProvider>{children}</PlateProvider>
       </body>
     </html>
   );
