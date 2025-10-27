@@ -12,11 +12,6 @@ export default function Step2({ onComplete }: Step2Props) {
   const [socketCount, setSocketCount] = useState(1);
   const [orientation, setOrientation] = useState('horizontal');
 
-  const panels = [
-    { id: '1', dimensions: '151.5 × 36.8 cm' },
-    { id: '2', dimensions: '200 × 100 cm' },
-  ];
-
   const handleContinue = () => {
     if (selectedPanel) {
       onComplete();
