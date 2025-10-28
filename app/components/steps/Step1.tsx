@@ -211,8 +211,14 @@ const DimensionCard: React.FC<{
 // Main Component
 export default function Step1({ onComplete }: Step1Props) {
   // Use plate context (automatically saves to localStorage)
-  const { dimensions, setDimensions, activeIndex, setActiveIndex } =
-    usePlateContext();
+  const {
+    dimensions,
+    setDimensions,
+    activeIndex,
+    setActiveIndex,
+    sockets,
+    setSockets,
+  } = usePlateContext();
 
   const addDimension = useCallback(() => {
     setDimensions((prev) => {
@@ -242,8 +248,20 @@ export default function Step1({ onComplete }: Step1Props) {
 
         return filtered;
       });
+
+      // Remove sockets belonging to deleted plate and adjust indices
+      setSockets((prevSockets) =>
+        prevSockets
+          .filter((socket) => socket.plateIndex !== index)
+          .map((socket) => {
+            if (socket.plateIndex > index) {
+              return { ...socket, plateIndex: socket.plateIndex - 1 };
+            }
+            return socket;
+          })
+      );
     },
-    [activeIndex]
+    [activeIndex, setSockets]
   );
 
   const updateDimension = useCallback(

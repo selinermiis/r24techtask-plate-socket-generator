@@ -5,7 +5,6 @@ import Stepper, { StepConfig } from './Stepper';
 import Step1 from './steps/Step1';
 import Step2 from './steps/Step2';
 import Step3 from './steps/Step3';
-import Step4 from './steps/Step4';
 
 export default function ControllerContainer() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -53,13 +52,15 @@ export default function ControllerContainer() {
     {
       id: 3,
       title: 'Bestätigung.',
-      content: <Step3 onComplete={handleStepComplete} />,
+      content: (
+        <Step3
+          onComplete={handleStepComplete}
+          onBackToStep2={() => {
+            setCurrentStep(2);
+          }}
+        />
+      ),
       alwaysVisible: true, // Step 3 content is always visible with opacity
-    },
-    {
-      id: 4,
-      title: 'Abgeschlossen.',
-      content: <Step4 />,
     },
   ];
 

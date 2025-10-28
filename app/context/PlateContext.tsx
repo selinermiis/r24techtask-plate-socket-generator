@@ -1,7 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState } from 'react';
-import { usePersistedDimensions } from '@/app/hooks/hooks';
+import React, { createContext, useContext, ReactNode } from 'react';
+import {
+  usePersistedDimensions,
+  usePersistedSocketData,
+} from '@/app/hooks/hooks';
 import type { DimensionValue } from '@/app/features/validation/types';
 
 export interface Socket {
@@ -11,6 +14,8 @@ export interface Socket {
   orientation: 'horizontal' | 'vertical';
   leftDistance: string;
   bottomDistance: string;
+  anchorX?: number; // cm - position of anchor point (center of leftmost socket)
+  anchorY?: number; // cm - position of anchor point (center of leftmost socket)
 }
 
 interface PlateContextType {
@@ -30,8 +35,16 @@ interface PlateContextType {
   setSocketOrientation: React.Dispatch<
     React.SetStateAction<'horizontal' | 'vertical'>
   >;
+  distanceLeft: string;
+  setDistanceLeft: React.Dispatch<React.SetStateAction<string>>;
+  distanceBottom: string;
+  setDistanceBottom: React.Dispatch<React.SetStateAction<string>>;
   sockets: Socket[];
   setSockets: React.Dispatch<React.SetStateAction<Socket[]>>;
+  activeSocketId: string | null;
+  setActiveSocketId: React.Dispatch<React.SetStateAction<string | null>>;
+  editingSocketId: string | null;
+  setEditingSocketId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const PlateContext = createContext<PlateContextType | undefined>(undefined);
@@ -40,15 +53,26 @@ export function PlateProvider({ children }: { children: ReactNode }) {
   const { dimensions, setDimensions, activeIndex, setActiveIndex } =
     usePersistedDimensions();
 
-  const [cutoutsEnabled, setCutoutsEnabled] = useState(true);
-  const [selectedPlateForSocket, setSelectedPlateForSocket] = useState<
-    number | null
-  >(null);
-  const [socketCount, setSocketCount] = useState(1);
-  const [socketOrientation, setSocketOrientation] = useState<
-    'horizontal' | 'vertical'
-  >('vertical');
-  const [sockets, setSockets] = useState<Socket[]>([]);
+  const {
+    cutoutsEnabled,
+    setCutoutsEnabled,
+    selectedPlateForSocket,
+    setSelectedPlateForSocket,
+    socketCount,
+    setSocketCount,
+    socketOrientation,
+    setSocketOrientation,
+    distanceLeft,
+    setDistanceLeft,
+    distanceBottom,
+    setDistanceBottom,
+    sockets,
+    setSockets,
+    activeSocketId,
+    setActiveSocketId,
+    editingSocketId,
+    setEditingSocketId,
+  } = usePersistedSocketData();
 
   return (
     <PlateContext.Provider
@@ -65,8 +89,16 @@ export function PlateProvider({ children }: { children: ReactNode }) {
         setSocketCount,
         socketOrientation,
         setSocketOrientation,
+        distanceLeft,
+        setDistanceLeft,
+        distanceBottom,
+        setDistanceBottom,
         sockets,
         setSockets,
+        activeSocketId,
+        setActiveSocketId,
+        editingSocketId,
+        setEditingSocketId,
       }}
     >
       {children}

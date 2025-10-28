@@ -2,6 +2,8 @@
  * Dimension constraints for plate validation
  */
 
+import type { DimensionValue } from './types';
+
 export const DIMENSION_CONSTRAINTS = {
   width: {
     min: 20,
@@ -22,7 +24,7 @@ export const PLATE_CONSTRAINTS = {
   maxPlates: Infinity, // No limit
 } as const;
 
-export const INITIAL_PLATE_DIMENSION = {
+export const INITIAL_PLATE_DIMENSION: DimensionValue = {
   width: '151.5',
   height: '36.8',
-} as const;
+};
