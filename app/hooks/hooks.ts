@@ -1,108 +1,13 @@
 /**
- * React hooks for dimension validation and localStorage
+ * React hooks for localStorage persistence
  */
 
-import { useMemo, useCallback, useState, useEffect } from 'react';
-import type {
-  DimensionValue,
-  DimensionField,
-} from '../features/validation/types';
+import { useState, useEffect } from 'react';
+import type { DimensionValue } from '../features/validation/types';
 import { INITIAL_PLATE_DIMENSION } from '../features/validation/constants';
-import {
-  validateDimensions,
-  validateAllDimensions,
-  clampDimensionValue,
-  sanitizeNumericInput,
-  getDimensionConstraint,
-} from '../features/validation/validators';
 
 /**
- * Hook for validating a single dimension
- */
-export function useDimensionValidation(dimension: DimensionValue) {
-  const validation = useMemo(
-    () => validateDimensions(dimension),
-    [dimension.width, dimension.height]
-  );
-
-  return validation;
-}
-
-/**
- * Hook for validating multiple dimensions
- */
-export function useMultipleDimensionsValidation(dimensions: DimensionValue[]) {
-  const isValid = useMemo(
-    () => validateAllDimensions(dimensions),
-    [dimensions]
-  );
-
-  const validationResults = useMemo(
-    () => dimensions.map((dim) => validateDimensions(dim)),
-    [dimensions]
-  );
-
-  return {
-    isValid,
-    validationResults,
-  };
-}
-
-/**
- * Hook for handling dimension input with validation and sanitization
- */
-export function useDimensionInput(
-  value: string,
-  field: DimensionField,
-  onChange: (value: string) => void,
-  options: {
-    autoClamp?: boolean;
-    sanitize?: boolean;
-  } = {}
-) {
-  const { autoClamp = false, sanitize = true } = options;
-
-  const constraint = getDimensionConstraint(field);
-
-  const handleChange = useCallback(
-    (newValue: string) => {
-      let processedValue = newValue;
-
-      // Sanitize input
-      if (sanitize) {
-        processedValue = sanitizeNumericInput(processedValue);
-      }
-
-      // Auto-clamp if enabled
-      if (autoClamp) {
-        const clamped = clampDimensionValue(processedValue, field);
-        processedValue = clamped.value.toString();
-      }
-
-      onChange(processedValue);
-    },
-    [field, onChange, autoClamp, sanitize]
-  );
-
-  const handleBlur = useCallback(() => {
-    if (autoClamp && value) {
-      const clamped = clampDimensionValue(value, field);
-      if (clamped.wasClamped) {
-        onChange(clamped.value.toString());
-      }
-    }
-  }, [value, field, onChange, autoClamp]);
-
-  return {
-    value,
-    onChange: handleChange,
-    onBlur: handleBlur,
-    constraint,
-  };
-}
-
-/**
- * Basit localStorage hook - Client-only için
+ * localStorage hook for persisting dimensions
  */
 export function usePersistedDimensions() {
   const [dimensions, setDimensionsState] = useState<DimensionValue[]>([

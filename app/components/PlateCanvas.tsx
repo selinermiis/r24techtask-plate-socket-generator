@@ -12,8 +12,18 @@ import {
 export default function PlateCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { dimensions, activeIndex, setActiveIndex } = usePlateContext();
+  const { dimensions, activeIndex, setActiveIndex, selectedPlateForSocket } =
+    usePlateContext();
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+
+  // Filter dimensions to show only selected plate if in Step 2
+  const displayDimensions = React.useMemo(() => {
+    if (selectedPlateForSocket !== null) {
+      // Show only the selected plate
+      return [dimensions[selectedPlateForSocket]].filter(Boolean);
+    }
+    return dimensions;
+  }, [dimensions, selectedPlateForSocket]);
 
   /**
    * Render plates on canvas
@@ -31,7 +41,7 @@ export default function PlateCanvas() {
 
     // Calculate scaling and positions
     const scalingResult = calculatePlateScaling(
-      dimensions,
+      displayDimensions,
       canvasSize.width,
       canvasSize.height
     );
@@ -50,7 +60,7 @@ export default function PlateCanvas() {
       canvasSize.height,
       options
     );
-  }, [canvasSize, dimensions]);
+  }, [canvasSize, displayDimensions]);
 
   /**
    * Calculate plate positions for HTML overlay
@@ -59,13 +69,13 @@ export default function PlateCanvas() {
     if (canvasSize.width === 0 || canvasSize.height === 0) return [];
 
     const scalingResult = calculatePlateScaling(
-      dimensions,
+      displayDimensions,
       canvasSize.width,
       canvasSize.height
     );
 
     return scalingResult.plates;
-  }, [dimensions, canvasSize]);
+  }, [displayDimensions, canvasSize]);
 
   /**
    * Handle canvas click and touch interactions
@@ -169,11 +179,7 @@ export default function PlateCanvas() {
   }, [renderPlates]);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full relative"
-      style={{ minHeight: '300px' }}
-    >
+    <div ref={containerRef} className="w-full h-full relative">
       <canvas
         ref={canvasRef}
         onClick={handleClick}

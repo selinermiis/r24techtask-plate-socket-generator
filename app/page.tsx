@@ -10,7 +10,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="responsive-grid w-full">
+      <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[3fr_1.25fr] gap-4 h-[calc(100vh-5rem)] max-w-full mx-auto p-4 md:p-6 box-border w-full">
         <CanvasContainer />
         <ControllerContainer />
       </main>
