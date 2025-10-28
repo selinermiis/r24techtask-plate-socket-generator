@@ -6,14 +6,20 @@ export interface StepConfig {
   id: number;
   title: string;
   content?: ReactNode;
+  alwaysVisible?: boolean; // Content is always visible, but with opacity when not active
 }
 
 interface StepperProps {
   steps: StepConfig[];
   currentStep: number;
+  onStepClick?: (stepId: number) => void;
 }
 
-export default function Stepper({ steps, currentStep }: StepperProps) {
+export default function Stepper({
+  steps,
+  currentStep,
+  onStepClick,
+}: StepperProps) {
   return (
     <div className="flex flex-col">
       {steps.map((step, index) => {
@@ -21,6 +27,7 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
         const isCurrent = currentStep === step.id;
         const isPending = currentStep < step.id;
         const isLastStep = index === steps.length - 1;
+        const isClickable = isCompleted || isCurrent;
 
         return (
           <div key={step.id} className="flex gap-2">
@@ -28,6 +35,7 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
             <div className="flex flex-col items-center shrink-0">
               {/* Circle */}
               <div
+                onClick={() => isClickable && onStepClick?.(step.id)}
                 className={`
                   flex items-center justify-center
                   w-8 h-8 rounded-full
@@ -35,9 +43,9 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
                   transition-all duration-200
                   ${
                     isCurrent
-                      ? 'bg-primary border-primary text-white shadow-lg'
+                      ? 'bg-primary border-primary text-white shadow-lg cursor-pointer hover:scale-105'
                       : isCompleted
-                        ? 'bg-primary border-primary text-white'
+                        ? 'bg-primary border-primary text-white cursor-pointer hover:shadow-md hover:scale-105'
                         : 'bg-white border-gray-300 text-gray-400'
                   }
                 `}
@@ -76,14 +84,15 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
             {/* Right: Title and Content */}
             <div className="flex-1 pb-8">
               <h3
+                onClick={() => isClickable && onStepClick?.(step.id)}
                 className={`
                   text-base mb-2
                   transition-all duration-200
                   ${
                     isCurrent
-                      ? 'text-gray-900'
+                      ? 'text-gray-900 cursor-pointer hover:text-black'
                       : isCompleted
-                        ? 'text-gray-700'
+                        ? 'text-gray-700 cursor-pointer hover:text-gray-900'
                         : 'text-gray-400'
                   }
                 `}
@@ -101,8 +110,26 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
               </h3>
 
               {/* Step Content */}
-              {isCurrent && step.content && (
-                <div className="mt-4">{step.content}</div>
+              {step.content && (
+                <>
+                  {step.alwaysVisible ? (
+                    // Always visible with opacity
+                    <div
+                      className={`mt-4 transition-opacity duration-300 ${
+                        isCurrent || isCompleted
+                          ? 'opacity-100'
+                          : 'opacity-40 pointer-events-none'
+                      }`}
+                    >
+                      {step.content}
+                    </div>
+                  ) : (
+                    // Show only if current or completed
+                    (isCurrent || isCompleted) && (
+                      <div className="mt-4">{step.content}</div>
+                    )
+                  )}
+                </>
               )}
             </div>
           </div>
