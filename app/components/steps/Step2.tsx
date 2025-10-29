@@ -6,18 +6,14 @@ import SocketToggle from '@/app/components/steps/step2/SocketToggle';
 import PlateSelectionGrid from '@/app/components/steps/step2/PlateSelectionGrid';
 import SocketConfiguration from '@/app/components/steps/step2/SocketConfiguration';
 import PositionInputs from './step2/PositionInputs';
-// import SocketGroupList from './step2/SocketGroupList';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Socket } from '@/app/context/PlateContext';
+import type { Socket } from '@/app/types';
 import {
   validateSocketFull,
   type ValidationResult,
 } from '@/app/utils/canvas/drawing';
-
-interface Step2Props {
-  onComplete: () => void;
-}
+import type { Step2Props } from '@/app/types';
 
 export default function Step2({ onComplete }: Step2Props) {
   const {
@@ -476,14 +472,6 @@ export default function Step2({ onComplete }: Step2Props) {
             selectedIndex={selectedPlateForSocket}
             onSelect={handlePlateSelect}
           />
-
-          {/* Socket groups list - only show if a plate is selected and has sockets */}
-          {/* {selectedPlateForSocket !== null && (
-            <SocketGroupList
-              onSelectGroup={handleSocketSelect}
-              onDeleteGroup={handleSocketDelete}
-            />
-          )} */}
 
           {/* 2) Socket configuration */}
           <SocketConfiguration

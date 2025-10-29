@@ -13,7 +13,6 @@ import {
   type DrawingOptions,
   type SocketScaled,
 } from '@/app/utils/canvas/drawing';
-import { cmToPixels } from '@/app/utils/canvas/scaling';
 
 export default function PlateCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -74,7 +73,6 @@ export default function PlateCanvas() {
   const renderPlates = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || canvasSize.width === 0 || canvasSize.height === 0) {
-      console.log('❌ Canvas not ready:', { canvas: !!canvas, canvasSize });
       return;
     }
 

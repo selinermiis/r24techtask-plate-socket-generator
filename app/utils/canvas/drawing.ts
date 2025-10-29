@@ -389,25 +389,25 @@ export function validateSocketPosition(
   if (startX < minDistanceFromEdge) {
     return {
       isValid: false,
-      error: `Distance from left edge must be at least 7 cm`,
+      error: `Socket group must be at least ${minDistanceFromEdge} cm from left edge`,
     };
   }
   if (startY < minDistanceFromEdge) {
     return {
       isValid: false,
-      error: `Distance from bottom edge must be at least 7 cm`,
+      error: `Socket group must be at least ${minDistanceFromEdge} cm from bottom edge`,
     };
   }
   if (endX > plateWidth - minDistanceFromEdge) {
     return {
       isValid: false,
-      error: `Distance from right edge must be at least 7 cm`,
+      error: `Socket group must be at least ${minDistanceFromEdge} cm from right edge`,
     };
   }
   if (endY > plateHeight - minDistanceFromEdge) {
     return {
       isValid: false,
-      error: `Distance from top edge must be at least 7 cm`,
+      error: `Socket group must be at least ${minDistanceFromEdge} cm from top edge`,
     };
   }
 

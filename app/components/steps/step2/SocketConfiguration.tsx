@@ -1,14 +1,7 @@
 import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-
-interface SocketConfigurationProps {
-  socketCount: number;
-  onSocketCountChange: (count: number) => void;
-  socketOrientation: 'horizontal' | 'vertical';
-  onOrientationChange: (orientation: 'horizontal' | 'vertical') => void;
-  disabled?: boolean;
-}
+import type { SocketConfigurationProps } from '@/app/types';
 
 export default function SocketConfiguration({
   socketCount,

@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import type { DimensionValue } from '../features/validation/types';
 import { INITIAL_PLATE_DIMENSION } from '../features/validation/constants';
-import type { Socket } from '../context/PlateContext';
+import type { Socket } from '../types';
 
 /**
  * localStorage hook for persisting dimensions
@@ -38,7 +38,6 @@ export function usePersistedDimensions() {
     if (mounted) {
       try {
         localStorage.setItem('dimensions', JSON.stringify(dimensions));
-        console.log('✅ localStorage save:', { dimensions });
       } catch (e) {
         console.error('localStorage write error:', e);
       }
@@ -50,7 +49,6 @@ export function usePersistedDimensions() {
     if (mounted) {
       try {
         localStorage.setItem('activeIndex', String(activeIndex));
-        console.log('✅ activeIndex save:', activeIndex);
       } catch (e) {
         console.error('localStorage write error:', e);
       }
@@ -138,7 +136,6 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('cutoutsEnabled', String(cutoutsEnabled));
-        console.log('✅ cutoutsEnabled save:', cutoutsEnabled);
       } catch (e) {
         console.error('localStorage write error (cutoutsEnabled):', e);
       }
@@ -153,7 +150,6 @@ export function usePersistedSocketData() {
           'selectedPlateForSocket',
           String(selectedPlateForSocket)
         );
-        console.log('✅ selectedPlateForSocket save:', selectedPlateForSocket);
       } catch (e) {
         console.error('localStorage write error (selectedPlateForSocket):', e);
       }
@@ -165,7 +161,6 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('socketCount', String(socketCount));
-        console.log('✅ socketCount save:', socketCount);
       } catch (e) {
         console.error('localStorage write error (socketCount):', e);
       }
@@ -177,7 +172,6 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('socketOrientation', socketOrientation);
-        console.log('✅ socketOrientation save:', socketOrientation);
       } catch (e) {
         console.error('localStorage write error (socketOrientation):', e);
       }
@@ -189,7 +183,6 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('distanceLeft', distanceLeft);
-        console.log('✅ distanceLeft save:', distanceLeft);
       } catch (e) {
         console.error('localStorage write error (distanceLeft):', e);
       }
@@ -201,7 +194,6 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('distanceBottom', distanceBottom);
-        console.log('✅ distanceBottom save:', distanceBottom);
       } catch (e) {
         console.error('localStorage write error (distanceBottom):', e);
       }
@@ -213,7 +205,6 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('sockets', JSON.stringify(sockets));
-        console.log('✅ sockets save:', sockets);
       } catch (e) {
         console.error('localStorage write error (sockets):', e);
       }

@@ -15,14 +15,6 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'R24 Technical Task - Plate & Socket Generator',
-  description:
-    'A professional tool for generating electrical plates and sockets for circuits',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
 };
 
 export default function RootLayout({
