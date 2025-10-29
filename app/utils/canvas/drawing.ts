@@ -235,8 +235,8 @@ export function drawSocket(
   ctx.strokeRect(socket.x, socket.y, socket.width, socket.height);
 
   // Draw two holes for the socket (circular openings)
-  const holeRadius = Math.min(socket.width, socket.height) * 0.15; // 15% of size
-  const holeSpacing = Math.min(socket.width, socket.height) * 0.25; // spacing between holes
+  const holeRadius = Math.min(socket.width, socket.height) * 0.1; // 15% of size
+  const holeSpacing = Math.min(socket.width, socket.height) * 0.2; // spacing between holes
   const centerX = socket.x + socket.width / 2;
   const centerY = socket.y + socket.height / 2;
 

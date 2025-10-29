@@ -79,7 +79,8 @@ export default function Step3({ onComplete, onBackToStep2 }: Step3Props) {
           </p>
           <Button
             onClick={handleAddSocket}
-            className="bg-green-600 hover:bg-green-700 text-white border-none"
+            className="w-full sm:w-auto flex justify-self-end items-center text-green-800 border-green-400 hover:bg-green-100 hover:text-green-800"
+            variant="outline"
           >
             Steckdose hinzufügen
           </Button>

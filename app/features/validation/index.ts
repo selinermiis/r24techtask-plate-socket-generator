@@ -1,5 +1,5 @@
 /**
- * Validation module - Basitleştirilmiş versiyon
+ * Validation module - Simplified version
  */
 
 // Constants

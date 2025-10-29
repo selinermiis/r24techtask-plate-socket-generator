@@ -61,6 +61,13 @@ export default function PlateCanvas() {
     return sockets;
   }, [sockets, selectedPlateForSocket]);
 
+  // Clear active socket when no plate is selected
+  useEffect(() => {
+    if (selectedPlateForSocket === null && activeSocketId) {
+      setActiveSocketId(null);
+    }
+  }, [selectedPlateForSocket, activeSocketId, setActiveSocketId]);
+
   /**
    * Render plates and sockets on canvas
    */
@@ -147,6 +154,37 @@ export default function PlateCanvas() {
         socketScaled.forEach((singleSocket, idx) => {
           const isActive = socket.id === activeSocketId;
           drawSocket(ctx, singleSocket, scalingResult.scale, isActive);
+
+          // Draw separator line between sockets (except for the last one)
+          if (idx < socketScaled.length - 1) {
+            const gapPx = 0.5 * scalingResult.scale; // 0.5cm gap in pixels
+
+            if (socket.orientation === 'horizontal') {
+              // Vertical separator line
+              const separatorX =
+                singleSocket.x + singleSocket.width + gapPx / 2;
+              ctx.strokeStyle = '#D1D5DB'; // Light gray
+              ctx.lineWidth = 1;
+              ctx.setLineDash([2, 2]); // Dashed line
+              ctx.beginPath();
+              ctx.moveTo(separatorX, singleSocket.y);
+              ctx.lineTo(separatorX, singleSocket.y + singleSocket.height);
+              ctx.stroke();
+              ctx.setLineDash([]); // Reset line dash
+            } else {
+              // Horizontal separator line
+              const separatorY =
+                singleSocket.y + singleSocket.height + gapPx / 2;
+              ctx.strokeStyle = '#D1D5DB'; // Light gray
+              ctx.lineWidth = 1;
+              ctx.setLineDash([2, 2]); // Dashed line
+              ctx.beginPath();
+              ctx.moveTo(singleSocket.x, separatorY);
+              ctx.lineTo(singleSocket.x + singleSocket.width, separatorY);
+              ctx.stroke();
+              ctx.setLineDash([]); // Reset line dash
+            }
+          }
         });
 
         // Draw helper lines after sockets (so they appear on top)
@@ -530,16 +568,234 @@ export default function PlateCanvas() {
   );
 
   /**
-   * Handle touch events
+   * Handle touch start events
+   */
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      const canvas = canvasRef.current;
+      if (!canvas || !scalingResult || !cutoutsEnabled) return;
+
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+
+        // Check if touching a socket to start dragging
+        for (const socket of displaySockets) {
+          // Find the plate that this socket belongs to
+          const plate =
+            selectedPlateForSocket !== null
+              ? scalingResult.plates[0]
+              : scalingResult.plates.find((p) => p.index === socket.plateIndex);
+          if (!plate) continue;
+
+          const anchorX =
+            socket.anchorX ??
+            parseFloat(socket.leftDistance) ??
+            plate.originalWidth / 2;
+          const anchorY =
+            socket.anchorY ??
+            parseFloat(socket.bottomDistance) ??
+            plate.originalHeight / 2;
+
+          const socketScaled = calculateSocketPositions(
+            anchorX,
+            anchorY,
+            socket.count,
+            socket.orientation,
+            scalingResult.scale,
+            plate.x,
+            plate.y,
+            plate.width,
+            plate.height
+          );
+
+          // Check if touching any socket in the group
+          for (const singleSocket of socketScaled) {
+            if (
+              x >= singleSocket.x &&
+              x <= singleSocket.x + singleSocket.width &&
+              y >= singleSocket.y &&
+              y <= singleSocket.y + singleSocket.height
+            ) {
+              setDraggingSocketId(socket.id);
+              setActiveSocketId(socket.id);
+              // Clear editing mode when starting drag to allow input updates
+              setEditingSocketId(null);
+              setDragStart({ x, y });
+              // Save initial position for snap back
+              const currentAnchorX =
+                socket.anchorX ?? parseFloat(socket.leftDistance) ?? 0;
+              const currentAnchorY =
+                socket.anchorY ?? parseFloat(socket.bottomDistance) ?? 0;
+              setDragStartPosition({
+                anchorX: currentAnchorX,
+                anchorY: currentAnchorY,
+              });
+              setDragErrorMessage(null);
+              e.preventDefault();
+              return;
+            }
+          }
+        }
+      }
+    },
+    [
+      displaySockets,
+      scalingResult,
+      setActiveSocketId,
+      setEditingSocketId,
+      cutoutsEnabled,
+      selectedPlateForSocket,
+    ]
+  );
+
+  /**
+   * Handle touch move events (dragging)
+   */
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (!draggingSocketId || !scalingResult) return;
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+
+        // Find the socket being dragged
+        const socket = displaySockets.find((s) => s.id === draggingSocketId);
+        if (!socket) return;
+
+        // Find the plate that this socket belongs to
+        const plate =
+          selectedPlateForSocket !== null
+            ? scalingResult.plates[0]
+            : scalingResult.plates.find((p) => p.index === socket.plateIndex);
+        if (!plate) return;
+
+        // Calculate delta in cm
+        const deltaXPx = x - dragStart.x;
+        const deltaYPx = y - dragStart.y;
+        const deltaXCm = deltaXPx / scalingResult.scale;
+        const deltaYCm = -deltaYPx / scalingResult.scale; // Flip Y axis
+
+        // Get current anchor position
+        const currentAnchorX =
+          socket.anchorX ??
+          parseFloat(socket.leftDistance) ??
+          plate.originalWidth / 2;
+        const currentAnchorY =
+          socket.anchorY ??
+          parseFloat(socket.bottomDistance) ??
+          plate.originalHeight / 2;
+
+        // Calculate new anchor position
+        const newAnchorX = currentAnchorX + deltaXCm;
+        const newAnchorY = currentAnchorY + deltaYCm;
+
+        // Get all sockets on the same plate for collision checking
+        const plateSockets = sockets.filter(
+          (s) => s.plateIndex === socket.plateIndex
+        );
+
+        // Validate position with full validation including collisions
+        const validation = validateSocketFull(
+          newAnchorX,
+          newAnchorY,
+          socket.count,
+          socket.orientation,
+          plate.originalWidth,
+          plate.originalHeight,
+          plateSockets,
+          draggingSocketId // Exclude the socket being dragged
+        );
+
+        if (validation.isValid) {
+          // Update socket position - update the full sockets array, not just displaySockets
+          setSockets((prevSockets) =>
+            prevSockets.map((s) =>
+              s.id === draggingSocketId
+                ? { ...s, anchorX: newAnchorX, anchorY: newAnchorY }
+                : s
+            )
+          );
+
+          // Always update input fields when dragging any socket
+          setDistanceLeft(newAnchorX.toString());
+          setDistanceBottom(newAnchorY.toString());
+
+          setDragStart({ x, y });
+          setDragErrorMessage(null); // Clear error if position becomes valid
+        } else {
+          // Block drag and show error message
+          setDragErrorMessage(validation.error || 'Invalid position');
+        }
+
+        e.preventDefault();
+      }
+    },
+    [
+      draggingSocketId,
+      scalingResult,
+      displaySockets,
+      dragStart,
+      setSockets,
+      editingSocketId,
+      setDistanceLeft,
+      setDistanceBottom,
+      selectedPlateForSocket,
+    ]
+  );
+
+  /**
+   * Handle touch end events
    */
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent<HTMLCanvasElement>) => {
-      if (e.changedTouches.length > 0) {
+      // If there's an error at the end of drag, snap back to original position
+      if (dragErrorMessage && dragStartPosition && draggingSocketId) {
+        setSockets((prevSockets) =>
+          prevSockets.map((s) =>
+            s.id === draggingSocketId
+              ? {
+                  ...s,
+                  anchorX: dragStartPosition.anchorX,
+                  anchorY: dragStartPosition.anchorY,
+                }
+              : s
+          )
+        );
+        setDistanceLeft(dragStartPosition.anchorX.toString());
+        setDistanceBottom(dragStartPosition.anchorY.toString());
+      }
+
+      setDraggingSocketId(null);
+      setDragStartPosition(null);
+      // Clear error after a delay to show it was blocked
+      if (dragErrorMessage) {
+        setTimeout(() => setDragErrorMessage(null), 3000);
+      }
+
+      // Handle tap (not drag) for socket selection
+      if (e.changedTouches.length > 0 && !draggingSocketId) {
         const touch = e.changedTouches[0];
         handleInteraction(touch.clientX, touch.clientY);
       }
     },
-    [handleInteraction]
+    [
+      handleInteraction,
+      dragErrorMessage,
+      dragStartPosition,
+      draggingSocketId,
+      setSockets,
+      setDistanceLeft,
+      setDistanceBottom,
+    ]
   );
 
   /**
@@ -600,13 +856,15 @@ export default function PlateCanvas() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         className={draggingSocketId ? 'cursor-grabbing' : 'cursor-pointer'}
         style={{
           display: 'block',
           width: '100%',
           height: '100%',
-          touchAction: 'manipulation',
+          touchAction: 'none',
           position: 'absolute',
           inset: 0,
         }}
@@ -654,7 +912,7 @@ export default function PlateCanvas() {
       {/* Error message overlay */}
       {dragErrorMessage && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
-          <div className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in">
+          <div className="bg-red-500 text-white p-2 rounded-lg shadow-lg animate-fade-in">
             <p className="text-sm font-semibold">{dragErrorMessage}</p>
           </div>
         </div>

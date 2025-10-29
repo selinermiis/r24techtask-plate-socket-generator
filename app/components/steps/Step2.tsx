@@ -8,6 +8,7 @@ import SocketConfiguration from '@/app/components/steps/step2/SocketConfiguratio
 import PositionInputs from './step2/PositionInputs';
 // import SocketGroupList from './step2/SocketGroupList';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { Socket } from '@/app/context/PlateContext';
 import {
   validateSocketFull,
@@ -38,6 +39,7 @@ export default function Step2({ onComplete }: Step2Props) {
     editingSocketId,
     setEditingSocketId,
     activeSocketId,
+    setActiveSocketId,
   } = usePlateContext();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,6 +48,7 @@ export default function Step2({ onComplete }: Step2Props) {
     setSelectedPlateForSocket(index);
     // Reset editing mode when selecting a plate
     setEditingSocketId(null);
+    setActiveSocketId(null); // Clear active socket when plate selection changes
     setDistanceLeft('');
     setDistanceBottom('');
   };
@@ -299,6 +302,13 @@ export default function Step2({ onComplete }: Step2Props) {
     }
   }, [activeSocketId, sockets, editingSocketId]);
 
+  // Clear active socket when no plate is selected
+  useEffect(() => {
+    if (selectedPlateForSocket === null && activeSocketId) {
+      setActiveSocketId(null);
+    }
+  }, [selectedPlateForSocket, activeSocketId, setActiveSocketId]);
+
   // Reset editing mode when component unmounts if we were editing
   useEffect(() => {
     return () => {
@@ -417,14 +427,42 @@ export default function Step2({ onComplete }: Step2Props) {
   }, [distanceBottom]);
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-3 sm:space-y-4 px-1 sm:px-0">
       {/* Toggle for cutouts */}
       <SocketToggle
         enabled={cutoutsEnabled}
         onToggle={(checked) => {
           setCutoutsEnabled(checked);
           if (!checked) {
+            // Delete all socket groups when toggling OFF
+            setSockets([]);
             setSelectedPlateForSocket(null);
+          } else {
+            // When toggling ON, add a default socket group to first eligible plate
+            const eligiblePlateIndex = dimensions.findIndex((dim) => {
+              const width = parseFloat(dim.width);
+              const height = parseFloat(dim.height);
+              return width >= 40 && height >= 40;
+            });
+
+            if (eligiblePlateIndex !== -1) {
+              const defaultAnchorX = 10; // 10 cm from left
+              const defaultAnchorY = 10; // 10 cm from bottom
+
+              const newSocket = {
+                id: `socket-${Date.now()}`,
+                plateIndex: eligiblePlateIndex,
+                count: 1,
+                orientation: 'vertical' as const,
+                leftDistance: defaultAnchorX.toString(),
+                bottomDistance: defaultAnchorY.toString(),
+                anchorX: defaultAnchorX,
+                anchorY: defaultAnchorY,
+              };
+
+              setSockets([newSocket]);
+              setSelectedPlateForSocket(eligiblePlateIndex);
+            }
           }
         }}
       />
@@ -453,6 +491,7 @@ export default function Step2({ onComplete }: Step2Props) {
             onSocketCountChange={handleSocketCountChange}
             socketOrientation={socketOrientation}
             onOrientationChange={handleSocketOrientationChange}
+            disabled={selectedPlateForSocket === null}
           />
           {/* 3) Position inputs */}
           <PositionInputs
@@ -460,6 +499,7 @@ export default function Step2({ onComplete }: Step2Props) {
             distanceBottom={formattedDistanceBottom}
             onDistanceLeftChange={handleDistanceLeftChange}
             onDistanceBottomChange={handleDistanceBottomChange}
+            disabled={selectedPlateForSocket === null}
           />
           {/* Error message */}
           {errorMessage && (
@@ -471,7 +511,13 @@ export default function Step2({ onComplete }: Step2Props) {
           {/* 4) Confirm button */}
           <Button
             onClick={handleConfirm}
-            className="w-full sm:w-auto flex justify-self-end items-center text-green-800 border-green-400 hover:bg-green-100 hover:text-green-800"
+            disabled={selectedPlateForSocket === null}
+            className={cn(
+              'w-full flex justify-center items-center',
+              selectedPlateForSocket === null
+                ? 'opacity-50 pointer-events-none'
+                : 'text-green-800 border-green-400 hover:bg-green-100 hover:text-green-800'
+            )}
             variant="outline"
           >
             {editingSocketId || activeSocketId

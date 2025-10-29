@@ -7,6 +7,7 @@ interface SocketConfigurationProps {
   onSocketCountChange: (count: number) => void;
   socketOrientation: 'horizontal' | 'vertical';
   onOrientationChange: (orientation: 'horizontal' | 'vertical') => void;
+  disabled?: boolean;
 }
 
 export default function SocketConfiguration({
@@ -14,15 +15,21 @@ export default function SocketConfiguration({
   onSocketCountChange,
   socketOrientation,
   onOrientationChange,
+  disabled = false,
 }: SocketConfigurationProps) {
   return (
-    <div className="space-y-3 sm:space-y-4 pt-2">
+    <div
+      className={cn(
+        'space-y-3 sm:space-y-4 pt-2',
+        disabled && 'opacity-50 pointer-events-none'
+      )}
+    >
       <p className="text-xs sm:text-sm font-semibold text-foreground">
         Bestimme Anzahl und Ausrichtung der Steckdosen
       </p>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-0">
         {/* Quantity Section */}
-        <div className="space-x-2">
+        <div className="flex flex-col gap-2">
           <label className="text-xs sm:text-sm font-medium text-foreground">
             Anzahl
           </label>
@@ -31,8 +38,9 @@ export default function SocketConfiguration({
             size="sm"
             value={socketCount.toString()}
             onValueChange={(value) =>
-              value && onSocketCountChange(parseInt(value))
+              value && !disabled && onSocketCountChange(parseInt(value))
             }
+            disabled={disabled}
           >
             {['1', '2', '3', '4', '5'].map((num) => (
               <ToggleGroupItem
@@ -53,7 +61,7 @@ export default function SocketConfiguration({
         </div>
 
         {/* Orientation Section */}
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <label className="text-xs sm:text-sm font-medium text-foreground">
             Steckdosen-Ausrichtung
           </label>
@@ -64,9 +72,12 @@ export default function SocketConfiguration({
               socketOrientation === 'horizontal' ? 'Horizontal' : 'Vertikal'
             }
             onValueChange={(value) => {
-              if (value === 'Horizontal') onOrientationChange('horizontal');
-              if (value === 'Vertikal') onOrientationChange('vertical');
+              if (!disabled) {
+                if (value === 'Horizontal') onOrientationChange('horizontal');
+                if (value === 'Vertikal') onOrientationChange('vertical');
+              }
             }}
+            disabled={disabled}
           >
             <ToggleGroupItem
               value="Horizontal"

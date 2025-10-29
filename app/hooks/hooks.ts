@@ -17,7 +17,7 @@ export function usePersistedDimensions() {
   const [activeIndex, setActiveIndexState] = useState<number>(0);
   const [mounted, setMounted] = useState(false);
 
-  // İlk yüklemede localStorage'dan oku
+  // Read from localStorage on initial load
   useEffect(() => {
     setMounted(true);
     try {
@@ -29,30 +29,30 @@ export function usePersistedDimensions() {
         if (savedIndex) setActiveIndexState(parseInt(savedIndex));
       }
     } catch (e) {
-      console.error('localStorage okuma hatası:', e);
+      console.error('localStorage read error:', e);
     }
   }, []);
 
-  // Dimensions değiştiğinde localStorage'a kaydet
+  // Save to localStorage when dimensions change
   useEffect(() => {
     if (mounted) {
       try {
         localStorage.setItem('dimensions', JSON.stringify(dimensions));
-        console.log('✅ localStorage kayıt:', { dimensions });
+        console.log('✅ localStorage save:', { dimensions });
       } catch (e) {
-        console.error('localStorage yazma hatası:', e);
+        console.error('localStorage write error:', e);
       }
     }
   }, [dimensions, mounted]);
 
-  // ActiveIndex değiştiğinde localStorage'a kaydet
+  // Save to localStorage when activeIndex changes
   useEffect(() => {
     if (mounted) {
       try {
         localStorage.setItem('activeIndex', String(activeIndex));
-        console.log('✅ activeIndex kayıt:', activeIndex);
+        console.log('✅ activeIndex save:', activeIndex);
       } catch (e) {
-        console.error('localStorage yazma hatası:', e);
+        console.error('localStorage write error:', e);
       }
     }
   }, [activeIndex, mounted]);
@@ -69,7 +69,7 @@ export function usePersistedDimensions() {
  * localStorage hook for persisting socket data
  */
 export function usePersistedSocketData() {
-  const [cutoutsEnabled, setCutoutsEnabledState] = useState<boolean>(true);
+  const [cutoutsEnabled, setCutoutsEnabledState] = useState<boolean>(false);
   const [selectedPlateForSocket, setSelectedPlateForSocketState] = useState<
     number | null
   >(null);
@@ -129,7 +129,7 @@ export function usePersistedSocketData() {
       // activeSocketId is always null on initial load
       // User must explicitly select a socket
     } catch (e) {
-      console.error('localStorage okuma hatası (socket):', e);
+      console.error('localStorage read error (socket):', e);
     }
   }, []);
 
@@ -138,9 +138,9 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('cutoutsEnabled', String(cutoutsEnabled));
-        console.log('✅ cutoutsEnabled kayıt:', cutoutsEnabled);
+        console.log('✅ cutoutsEnabled save:', cutoutsEnabled);
       } catch (e) {
-        console.error('localStorage yazma hatası (cutoutsEnabled):', e);
+        console.error('localStorage write error (cutoutsEnabled):', e);
       }
     }
   }, [cutoutsEnabled, mounted]);
@@ -153,9 +153,9 @@ export function usePersistedSocketData() {
           'selectedPlateForSocket',
           String(selectedPlateForSocket)
         );
-        console.log('✅ selectedPlateForSocket kayıt:', selectedPlateForSocket);
+        console.log('✅ selectedPlateForSocket save:', selectedPlateForSocket);
       } catch (e) {
-        console.error('localStorage yazma hatası (selectedPlateForSocket):', e);
+        console.error('localStorage write error (selectedPlateForSocket):', e);
       }
     }
   }, [selectedPlateForSocket, mounted]);
@@ -165,9 +165,9 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('socketCount', String(socketCount));
-        console.log('✅ socketCount kayıt:', socketCount);
+        console.log('✅ socketCount save:', socketCount);
       } catch (e) {
-        console.error('localStorage yazma hatası (socketCount):', e);
+        console.error('localStorage write error (socketCount):', e);
       }
     }
   }, [socketCount, mounted]);
@@ -177,9 +177,9 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('socketOrientation', socketOrientation);
-        console.log('✅ socketOrientation kayıt:', socketOrientation);
+        console.log('✅ socketOrientation save:', socketOrientation);
       } catch (e) {
-        console.error('localStorage yazma hatası (socketOrientation):', e);
+        console.error('localStorage write error (socketOrientation):', e);
       }
     }
   }, [socketOrientation, mounted]);
@@ -189,9 +189,9 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('distanceLeft', distanceLeft);
-        console.log('✅ distanceLeft kayıt:', distanceLeft);
+        console.log('✅ distanceLeft save:', distanceLeft);
       } catch (e) {
-        console.error('localStorage yazma hatası (distanceLeft):', e);
+        console.error('localStorage write error (distanceLeft):', e);
       }
     }
   }, [distanceLeft, mounted]);
@@ -201,9 +201,9 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('distanceBottom', distanceBottom);
-        console.log('✅ distanceBottom kayıt:', distanceBottom);
+        console.log('✅ distanceBottom save:', distanceBottom);
       } catch (e) {
-        console.error('localStorage yazma hatası (distanceBottom):', e);
+        console.error('localStorage write error (distanceBottom):', e);
       }
     }
   }, [distanceBottom, mounted]);
@@ -213,9 +213,9 @@ export function usePersistedSocketData() {
     if (mounted) {
       try {
         localStorage.setItem('sockets', JSON.stringify(sockets));
-        console.log('✅ sockets kayıt:', sockets);
+        console.log('✅ sockets save:', sockets);
       } catch (e) {
-        console.error('localStorage yazma hatası (sockets):', e);
+        console.error('localStorage write error (sockets):', e);
       }
     }
   }, [sockets, mounted]);

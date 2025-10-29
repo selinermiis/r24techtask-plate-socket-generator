@@ -26,5 +26,5 @@ export const PLATE_CONSTRAINTS = {
 
 export const INITIAL_PLATE_DIMENSION: DimensionValue = {
   width: '151.5',
-  height: '36.8',
+  height: '40',
 };
