@@ -22,8 +22,8 @@ export interface ScalingResult {
   maxHeight: number; // pixels
 }
 
-const PADDING = 40; // pixels - padding from canvas edges
-const PLATE_GAP = 20; // pixels - gap between plates
+const PADDING = 10; // pixels - padding from canvas edges
+const PLATE_GAP = 10; // pixels - gap between plates
 
 /**
  * Calculate scaling and positions for all plates to fit in canvas

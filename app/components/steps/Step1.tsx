@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   DIMENSION_CONSTRAINTS,
   validateAllDimensions,
@@ -18,9 +18,7 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 // Types
-interface Step1Props {
-  onComplete: () => void;
-}
+interface Step1Props {}
 
 interface DimensionInputProps {
   label: string;
@@ -56,7 +54,7 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled
-            className="h-8 w-full text-base font-semibold text-center cursor-not-allowed"
+            className="h-8 w-full text-sm sm:text-base font-semibold text-center cursor-not-allowed"
             step="0.1"
             min={min}
             max={max}
@@ -73,11 +71,11 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
   // Full view for active cards
   return (
     <div className="flex flex-col gap-1 flex-1 min-w-0">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-1">
         <label className="text-xs sm:text-sm font-medium text-foreground truncate">
           {label}
         </label>
-        <span className="text-xs text-muted-foreground whitespace-nowrap ml-1">
+        <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
           {min} - {max} {unit}
         </span>
       </div>
@@ -87,7 +85,7 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          className="h-8 w-full text-base font-semibold text-center pr-8"
+          className="h-8 w-full sm:w-auto text-sm sm:text-base font-semibold text-center pr-2 sm:pr-8"
           step="0.1"
           min={min}
           max={max}
@@ -97,7 +95,7 @@ const DimensionInput: React.FC<DimensionInputProps> = ({
           {unit}
         </span>
       </div>
-      <div className="text-xs text-muted-foreground text-center">
+      <div className="text-[10px] sm:text-xs text-muted-foreground text-center">
         {mmValue} mm
       </div>
     </div>
@@ -149,11 +147,11 @@ const DimensionCard: React.FC<{
         : 'bg-muted  border opacity-80 hover:opacity-100'
     )}
   >
-    <div className="flex items-center gap-2 sm:gap-3">
+    <div className="flex items-start sm:items-center gap-2 sm:gap-3">
       {/* Number Badge */}
       <div
         className={cn(
-          'w-8 h-8 rounded-md flex items-center justify-center text-sm font-semibold shrink-0',
+          'w-6 h-6 sm:w-8 sm:h-8 rounded-md flex items-center justify-center text-xs sm:text-sm font-semibold shrink-0 mt-1',
           isActive
             ? 'bg-black text-white'
             : 'bg-background border border-foreground text-foreground'
@@ -164,7 +162,7 @@ const DimensionCard: React.FC<{
 
       {/* Dimension Inputs */}
       <div
-        className="flex-1 flex items-center gap-1.5 min-w-0"
+        className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-1.5 min-w-0"
         onClick={(e) => e.stopPropagation()}
       >
         <DimensionInput
@@ -180,7 +178,7 @@ const DimensionCard: React.FC<{
         {/* Multiply Icon */}
         <div
           className={cn(
-            'text-foreground text-lg font-light shrink-0',
+            'text-foreground text-lg font-light shrink-0 hidden sm:block',
             isActive && 'self-center'
           )}
         >
@@ -200,7 +198,7 @@ const DimensionCard: React.FC<{
 
       {/* Remove Button */}
       {showRemoveButton && (
-        <div className="shrink-0">
+        <div className="shrink-0 mt-1">
           <RemoveButton onClick={() => onRemove(index)} />
         </div>
       )}
@@ -209,10 +207,65 @@ const DimensionCard: React.FC<{
 );
 
 // Main Component
-export default function Step1({ onComplete }: Step1Props) {
+export default function Step1() {
   // Use plate context (automatically saves to localStorage)
-  const { dimensions, setDimensions, activeIndex, setActiveIndex } =
-    usePlateContext();
+  const {
+    dimensions,
+    setDimensions,
+    activeIndex,
+    setActiveIndex,
+    sockets,
+    setSockets,
+  } = usePlateContext();
+
+  // Track previous dimensions to detect changes
+  const prevDimensionsRef = useRef<DimensionValue[]>(dimensions);
+
+  // Remove sockets when plate dimensions change
+  useEffect(() => {
+    // Skip first render
+    if (prevDimensionsRef.current === dimensions) return;
+
+    // Check if any plate dimensions changed
+    if (prevDimensionsRef.current.length !== dimensions.length) {
+      prevDimensionsRef.current = dimensions;
+      return;
+    }
+
+    const hasDimensionChanged = prevDimensionsRef.current.some(
+      (prevDim, index) => {
+        const currentDim = dimensions[index];
+        return (
+          currentDim &&
+          (currentDim.width !== prevDim.width ||
+            currentDim.height !== prevDim.height)
+        );
+      }
+    );
+
+    if (hasDimensionChanged) {
+      // Find which plate's dimensions changed and remove its sockets
+      const changedPlates: number[] = [];
+      prevDimensionsRef.current.forEach((prevDim, index) => {
+        const currentDim = dimensions[index];
+        if (
+          currentDim &&
+          (currentDim.width !== prevDim.width ||
+            currentDim.height !== prevDim.height)
+        ) {
+          changedPlates.push(index);
+        }
+      });
+
+      if (changedPlates.length > 0) {
+        setSockets((prevSockets) =>
+          prevSockets.filter((s) => !changedPlates.includes(s.plateIndex))
+        );
+      }
+
+      prevDimensionsRef.current = dimensions;
+    }
+  }, [dimensions, setSockets]);
 
   const addDimension = useCallback(() => {
     setDimensions((prev) => {
@@ -220,7 +273,7 @@ export default function Step1({ onComplete }: Step1Props) {
       setActiveIndex(newIndex);
       return [...prev, createDefaultDimension()];
     });
-  }, []);
+  }, [setDimensions, setActiveIndex]);
 
   const removeDimension = useCallback(
     (index: number) => {
@@ -242,8 +295,20 @@ export default function Step1({ onComplete }: Step1Props) {
 
         return filtered;
       });
+
+      // Remove sockets belonging to deleted plate and adjust indices
+      setSockets((prevSockets) =>
+        prevSockets
+          .filter((socket) => socket.plateIndex !== index)
+          .map((socket) => {
+            if (socket.plateIndex > index) {
+              return { ...socket, plateIndex: socket.plateIndex - 1 };
+            }
+            return socket;
+          })
+      );
     },
-    [activeIndex]
+    [activeIndex, setSockets]
   );
 
   const updateDimension = useCallback(
@@ -252,30 +317,31 @@ export default function Step1({ onComplete }: Step1Props) {
         prev.map((dim, i) => (i === index ? { ...dim, [field]: value } : dim))
       );
     },
-    []
+    [setDimensions]
   );
 
-  const handleBlur = useCallback((index: number, field: DimensionField) => {
-    setDimensions((prev) => {
-      const dimension = prev[index];
-      if (!dimension) return prev;
+  const handleBlur = useCallback(
+    (index: number, field: DimensionField) => {
+      const dimension = dimensions[index];
+      if (!dimension) return;
 
       const currentValue = dimension[field];
       const clamped = clampDimensionValue(currentValue, field);
 
       // Only update if value was clamped
       if (clamped.wasClamped) {
-        return prev.map((dim, i) =>
-          i === index ? { ...dim, [field]: clamped.value.toString() } : dim
+        setDimensions((prev) =>
+          prev.map((dim, i) =>
+            i === index ? { ...dim, [field]: clamped.value.toString() } : dim
+          )
         );
       }
-
-      return prev;
-    });
-  }, []);
+    },
+    [dimensions, setDimensions]
+  );
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-3 sm:space-y-4 px-1 sm:px-0">
       {/* Dimension Cards */}
       {dimensions.map((dim, index) => (
         <DimensionCard
@@ -295,7 +361,7 @@ export default function Step1({ onComplete }: Step1Props) {
       {/* Add Back Panel Button */}
       <Button
         onClick={addDimension}
-        className="w-full sm:w-auto flex justify-self-end items-center text-green-800 border-green-400 hover:bg-green-100 hover:text-green-800"
+        className="w-full flex justify-center items-center text-green-800 border-green-400 hover:bg-green-100 hover:text-green-800"
         variant="outline"
         aria-label="Rückwand hinzufügen"
       >
