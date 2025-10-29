@@ -1,16 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-
-interface Plate {
-  width: string;
-  height: string;
-}
-
-interface PlateSelectionGridProps {
-  dimensions: Plate[];
-  selectedIndex: number | null;
-  onSelect: (index: number) => void;
-}
+import type { PlateSelectionGridProps } from '@/app/types';
 
 export default function PlateSelectionGrid({
   dimensions,

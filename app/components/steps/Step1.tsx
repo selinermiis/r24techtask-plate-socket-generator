@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
   DIMENSION_CONSTRAINTS,
-  validateAllDimensions,
   canDeletePlate,
   createDefaultDimension,
   cmToMm,
@@ -18,7 +17,6 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 // Types
-interface Step1Props {}
 
 interface DimensionInputProps {
   label: string;

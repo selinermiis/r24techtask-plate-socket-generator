@@ -1,14 +1,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-
-interface PositionInputsProps {
-  distanceLeft: string;
-  distanceBottom: string;
-  onDistanceLeftChange: (value: string) => void;
-  onDistanceBottomChange: (value: string) => void;
-  disabled?: boolean;
-}
+import type { PositionInputsProps } from '@/app/types';
 
 export default function PositionInputs({
   distanceLeft,

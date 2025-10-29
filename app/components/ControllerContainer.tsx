@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Stepper, { StepConfig } from './Stepper';
+import Stepper from './Stepper';
+import type { StepConfig } from '@/app/types';
 import Step1 from './steps/Step1';
 import Step2 from './steps/Step2';
 import Step3 from './steps/Step3';

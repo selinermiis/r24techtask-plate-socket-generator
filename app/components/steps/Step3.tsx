@@ -12,11 +12,7 @@ import {
 import { MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePlateContext } from '@/app/context/PlateContext';
-
-interface Step3Props {
-  onComplete?: () => void;
-  onBackToStep2?: () => void;
-}
+import type { Step3Props } from '@/app/types';
 
 export default function Step3({ onComplete, onBackToStep2 }: Step3Props) {
   const {

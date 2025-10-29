@@ -1,10 +1,6 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
-
-interface SocketToggleProps {
-  enabled: boolean;
-  onToggle: (checked: boolean) => void;
-}
+import type { SocketToggleProps } from '@/app/types';
 
 export default function SocketToggle({ enabled, onToggle }: SocketToggleProps) {
   return (

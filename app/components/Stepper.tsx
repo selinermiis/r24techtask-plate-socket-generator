@@ -1,19 +1,7 @@
 'use client';
 
-import React, { ReactNode } from 'react';
-
-export interface StepConfig {
-  id: number;
-  title: string;
-  content?: ReactNode;
-  alwaysVisible?: boolean; // Content is always visible, but with opacity when not active
-}
-
-interface StepperProps {
-  steps: StepConfig[];
-  currentStep: number;
-  onStepClick?: (stepId: number) => void;
-}
+import React from 'react';
+import type { StepConfig, StepperProps } from '@/app/types';
 
 export default function Stepper({
   steps,
